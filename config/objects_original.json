@@ -27,14 +27,6 @@
             "attributes": {
                 "color": "60, 60, 130"
             },
-            "spawn_point":{
-            	"x":17.1,
-            	"y":-28.1,
-            	"z":0.5,
-            	"roll":0.0,
-            	"pitch":0.0,
-            	"yaw":00.2
-            },
             "sensors": 
             [
                 {
