@@ -164,16 +164,24 @@ cd Carla-Autoware-Bridge/docker/
 ./build_docker.sh
 ```
 #### Mapas
- Autoware necesita los mapas en un formato especial "lanelet2".
- Están disponibles [*aquí*](https://syncandshare.lrz.de/getlink/fiBgYSNkmsmRB28meoX3gZ/).
 
- Parece que ese directorio ya no existe, hay que coger los mapas que están en el PC-5 o PC-6.
- Si los mapas tienen un repositorio. Hay dos ramas, los mapas de Hatem y los mapas de TUM, con las pruebas de relevance
+Autoware necesita los mapas en formato Lanelet2. El [enlace de descarga original](https://syncandshare.lrz.de/getlink/fiBgYSNkmsmRB28meoX3gZ/) ya no está disponible.
 
- Se crea un directorio y se descomprimen los mapas en:
- ```
- ~/proyectos/TUM/CarlaMaps
- ```
+Actualmente no existe un repositorio remoto para `CarlaMaps` debido a su tamaño. El contenido útil ocupa aproximadamente **2,2 GB** y la copia del PC4 ocupa **4,9 GB** al incluir también el historial local de Git y los objetos de Git LFS. Hay copias de los mapas en los equipos **PC4, PC5 y PC6**, por lo que deben copiarse desde uno de estos equipos.
+
+La copia local conserva dos ramas: una con los mapas de **Hatem Darweesh** y otra con los mapas de **TUM** y sus pruebas de funcionamiento.
+
+Los mapas deben quedar en:
+
+```text
+~/proyectos/TUM/CarlaMaps
+```
+
+En la carpeta `doc/` se incluye documentación adicional:
+
+- [Carla – Autoware Maps](<doc/Carla – Autoware Maps.docx>): compara los mapas de TUM y Hatem Darweesh para Town01–Town07 y Town10HD, e indica qué mapas funcionan, sus problemas de alineación, navegación, obstáculos y limitaciones conocidas.
+- [Enable Lane Change Between Adjacent Lanelets](<doc/Enable Lane Change Between Adjacent Lanelets.docx>): explica, mediante un ejemplo de Town04, cómo unir lanelets adyacentes, compartir correctamente su borde y etiquetar la línea discontinua para permitir cambios de carril.
+
 #### Ejecución
 Teniendo el contenedor de  ***CARLA*** en ejecución lanzaremos el puente ***CARLA-Autoware-Bridge***.
 Ejecutamos el docker del contenedor que va a manejar el puente.
