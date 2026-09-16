@@ -1,0 +1,137 @@
+/////////////////////////////////////////
+////// TEST TUM_PABLO    from Sergio ////
+/////////////////////////////////////////
+
+----------- CLEAR -------
+
+docker stop $(docker ps -q)
+docker rm $(docker ps -a -q)
+
+-------CARLA -----------
+sudo sysctl -w net.core.rmem_max=2147483647
+sudo sysctl -w net.core.wmem_max=2147483647
+sudo sysctl -w net.ipv4.ipfrag_time=3
+sudo sysctl -w net.ipv4.ipfrag_high_thresh=134217728
+cd ~/proyectos/TUM_Pablo/Carla_0.9.15/
+./CarlaUE4.sh -carla-rpc-port=1403 -prefernvidia -quality-level=Medium -RenderOffScreen
+
+
+----- BRIDGE ------
+docker run -it --name 'carlaBridge_docker' -e ROS_DOMAIN_ID=5 -e RMW_IMPLEMENTATION=rmw_cyclonedds_cpp --network host tumgeka/carla-autoware-bridge:latest
+ros2 launch carla_autoware_bridge carla_aw_bridge.launch.py port:=1403 town:=Town01
+
+
+------ VISTA -------
+cd ~/proyectos/TUM_Pablo/scripts/test_carla
+python3 vista.py
+
+
+------ AUTOWARE -----
+
+
+rocker --network=host -e RMW_IMPLEMENTATION=rmw_cyclonedds_cpp -e LIBGL_ALWAYS_SOFTWARE=1 -e ROS_DOMAIN_ID=5 --x11 --nvidia --volume /home/uwicore_pc5/proyectos/TUM_Pablo/ --name 'autoware_docker' -- ghcr.io/autowarefoundation/autoware:humble-2024.01-cuda-amd64
+cd /home/uwicore_pc5/proyectos/TUM_Pablo/autoware
+source /opt/ros/humble/setup.bash
+source install/setup.bash
+ros2 launch autoware_launch e2e_simulator.launch.xml vehicle_model:=carla_t2_vehicle sensor_model:=carla_t2_sensor_kit map_path:=/home/uwicore_pc5/proyectos/TUM_Pablo/CarlaMaps/Town01 rviz_config:=/home/uwicore_pc5/proyectos/TUM_Pablo/autoware/src/launcher/autoware_launch/autoware_launch/rviz/RViz_config_Sergio.rviz 
+
+
+
+------ SIMULACIONES -----
+source /home/uwicore_pc5/proyectos/TUM_Pablo/autoware/install/setup.bash
+cd /home/uwicore_pc5/proyectos/TUM_Pablo/scripts/Sergio
+./Grabar.sh prueba_ros 3
+
+Test topics:
+ros2 topic echo --once /perception/object_recognition/detection/centerpoint/objects
+
+ros2 topic echo --once /perception/object_recognition/detection/objects
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-------- VIEJO DE MARIO -----
+
+   
+    
+    Lanza carla
+    sudo sysctl -w net.core.rmem_max=2147483647
+    sudo sysctl -w net.ipv4.ipfrag_time=3
+    sudo sysctl -w net.ipv4.ipfrag_high_thresh=134217728
+    cd CARLA_0.9.15/
+    ./CarlaUE4.sh -carla-rpc-port=1403 -prefernvidia -quality-level=Medium -RenderOffScreen
+    
+    Lanza bridge
+    cd TUM_BRIDGE/Carla-Autoware-Bridge
+    docker run -it -e RMW_IMPLEMENTATION=rmw_cyclonedds_cpp --network host tumgeka/carla-autoware-bridge:latest
+    ros2 launch carla_autoware_bridge carla_aw_bridge.launch.py port:=1403 town:=Town02
+    
+    Lanza autoware
+    tmux new
+    rocker --network=host -e RMW_IMPLEMENTATION=rmw_cyclonedds_cpp -e LIBGL_ALWAYS_SOFTWARE=1 --x11 --nvidia --volume /home/uwicore-pc6/TUM_BRIDGE/ -- ghcr.io/autowarefoundation/autoware:humble-2024.01-cuda-amd64
+    cd /home/uwicore-pc6/TUM_BRIDGE/autoware
+    source /opt/ros/humble/setup.bash
+    source install/setup.bash
+    ros2 launch autoware_launch e2e_simulator.launch.xml vehicle_model:=carla_t2_vehicle sensor_model:=carla_t2_sensor_kit map_path:=/home/uwicore-pc6/TUM_BRIDGE/Town02_TUM
+    
+    
+    Preparar para grabar
+    docker ps
+    docker exec -it <nombre_contenedor> bash
+    cd /home/uwicore-pc6/TUM_BRIDGE/autoware
+    source install/setup.bash
+    ros2 bag record /clock /localization/kinematic_state /localization/acceleration /map/vector_map /sensing/gnss/ublox/nav_sat_fix /sensing/imu/tamagawa/imu_raw /sensing/gnss/pose_with_covariance /sensing/imu/imu_data /sensing/radar/front_center/objects /sensing/radar/front_left/objects /sensing/radar/front_right/objects /sensing/radar/rear_left/objects /sensing/radar/rear_right/objects /perception/object_recognition/detection/rois0 /perception/object_recognition/detection/rois1 /perception/object_recognition/detection/rois2 /perception/object_recognition/detection/rois3 /perception/object_recognition/detection/rois4 /perception/object_recognition/detection/centerpoint/validation/objects /perception/object_recognition/detection/objects /perception/object_recognition/objects /perception/occupancy_grid_map/map /perception/obstacle_segmentation/pointcloud /planning/scenario_planning/max_velocity_candidates /planning/scenario_planning/status/stop_reasons /planning/scenario_planning/lane_driving/trajectory /planning/scenario_planning/trajectory /control/trajectory_follower/control_cmd /control/command/control_cmd /control/command/emergency_cmd /control/command/hazard_lights_cmd /control/command/turn_indicators_cmd/vehicle/status/hazard_lights_status /vehicle/status/steering_status /vehicle/status/turn_indicators_status /vehicle/status/velocity_status -o <bag_name> --qos-profile-overrides-path qos_override.yaml
+    
+    Otra terminal 
+cd /home/uwicore-pc6/TUM_BRIDGE/autoware
+source install/setup.bash
+ros2 run raw_data_recorder raw_data_recorder_node
+
+
+
+SUMO
+
+
+cd Sumo/
+python3 run_synchronization.py scenarios/Ur_Pass_1_21_2c5.sumocfg --carla-port=1403 --tls-manager=sumo
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    

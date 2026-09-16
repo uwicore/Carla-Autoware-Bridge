@@ -1,0 +1,86 @@
+----------- CLEAR -------
+
+docker stop $(docker ps -q)
+docker rm $(docker ps -a -q)
+
+-------CARLA -----------
+sudo sysctl -w net.core.rmem_max=2147483647
+sudo sysctl -w net.core.wmem_max=2147483647
+sudo sysctl -w net.ipv4.ipfrag_time=3
+sudo sysctl -w net.ipv4.ipfrag_high_thresh=134217728
+cd ~/proyectos/CARLA_0.9.15/
+./CarlaUE4.sh -carla-rpc-port=1403 -prefernvidia -quality-level=Medium -resX=640 -resY=480
+
+ -RenderOffScreen
+
+
+----- BRIDGE ------
+docker run -it --name 'carlaBridge_docker' -e ROS_DOMAIN_ID=4 -e RMW_IMPLEMENTATION=rmw_cyclonedds_cpp --network host tumgeka/carla-autoware-bridge:latest
+ros2 launch carla_autoware_bridge carla_aw_bridge.launch.py port:=1403 town:=Town04
+
+------ VISTA -------
+cd /home/uwicore_pc4/proyectos/TUM/carla_project
+source /home/uwicore_pc4/venvs/carla0915/bin/activate
+/home/uwicore_pc4/venvs/carla0915/bin/python vista4.py 
+
+
+----- AUTOWARE -----
+rocker --persist-image --network=host -e RMW_IMPLEMENTATION=rmw_cyclonedds_cpp -e LIBGL_ALWAYS_SOFTWARE=1 -e ROS_DOMAIN_ID=4 --x11 --nvidia --volume /home/uwicore_pc4/proyectos/TUM/ --name 'autoware_docker' -- autoware-fixed
+
+cd /home/uwicore_pc4/proyectos/TUM/autoware
+source /opt/ros/humble/setup.bash
+source install/setup.bash
+ros2 launch autoware_launch e2e_simulator.launch.xml vehicle_model:=carla_t2_vehicle sensor_model:=carla_t2_sensor_kit map_path:=/home/uwicore_pc4/proyectos/TUM/CarlaMaps/Town04 rviz_config:=/home/uwicore_pc4/proyectos/TUM/autoware/src/launcher/autoware_launch/autoware_launch/rviz/RViz_config_Jaime.rviz 
+
+                
+                
+                ------ NODO pointcloud -----
+                docker exec -it autoware_docker bash
+
+                cd /home/uwicore_pc4/proyectos/TUM/autoware
+                source /opt/ros/humble/setup.bash
+                source install/setup.bash
+                ros2 run pointcloud_info pointcloud_info_node
+
+                ------ Comprobacion pointcloud -----
+                docker exec -it autoware_docker bash
+
+                source /opt/ros/humble/setup.bash
+                source /home/uwicore_pc4/proyectos/TUM/autoware/install/setup.bash
+                ros2 topic echo --once /sensing/lidar/concatenated/pointcloud_info
+    
+
+
+------ SIMULACIONES -----
+cd /home/uwicore_pc4/proyectos/TUM/carla_project
+source /home/uwicore_pc4/venvs/carla0915/bin/activate
+./Grabar.sh prueba_ros 3
+
+Test topics:
+ros2 topic echo --once /perception/object_recognition/detection/centerpoint/objects
+
+ros2 topic echo --once /perception/object_recognition/detection/objects
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Notas de tiempo y distancia de simulación de simulación coche aleja:
+    El lidar obtiene datos del centerpoint hasta los 7.7 seg de simulación más o menos.
+        Lo cual corresponde a que los datos del centerpoint se obtienen hasta 76m de distancia más o menos.
+    El lidar obtiene datos del detection hasta los 11.5 seg de simulación más o menos.
+        Lo cual corresponde a que los datos del detection se obtienen hasta 125m de distancia más o menos.
+Debido a esto no se necesita correr la simulación más de la calle 6, simplemente con la 6 y la 5 sobran. Así reducimos considerablemente el tiempo de ejecución de la simulación.
+
+
+En las simulaciones aleja y en la simulación acerca recto las duraciones son aproximadamente 100s y hay que cambiar el tiempo de simulación a 28.
+    Se puede optimizar más la simulación aleja giro fácilmente.
+EN la simulación acerca giro la duración son aproximadamente 50s y hay que cambiar el tiempo de simulación a 12.
+
+    - Se han lanzado 1000 simulaciones de coche acerca giro.
+    - Para lanzar simulaciones de coche aleja giro, hay que poner un tiempo de simulación de 12 como en la simulación de coche acerca giro.
+    -  Se han lanzado 1000 simulaciones de coche aleja giro.
+    - Se va ha optimizar los tiempos de simulación de las simulaciónes rectas.
+    - Se han optimizado los tiempos de coche aleja recto, hay que poner un tiempo de simulación de 16.
+    - Se han optimizado los tiempos de coche acerca recto, hay que poner un tiempo de simulación de 17.
+    - Hay que trabajar en el Town4
+    - En los tiempos de simulación del Town4 hay que poner 17. 
