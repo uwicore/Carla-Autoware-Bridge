@@ -594,20 +594,26 @@ En este [enlace](https://sumo.dlr.de/docs/Installing/Linux_Build.html) podremos 
 
 #### Ficheros de Co-Simulación
 
-Si Carla está instalado, los archivos están en:
+CARLA incluye una versión original de los ficheros de co-simulación en `Co-Simulation/Sumo`. Para este proyecto se utiliza el repositorio [uwicore/Sumo](https://github.com/uwicore/Sumo), que incorpora los cambios de sincronización y los escenarios empleados en las simulaciones.
+
+Clona el repositorio dentro del directorio `TUM`:
+
 ```bash
+cd /home/uwicore_pc4/proyectos/TUM
+git clone git@github.com:uwicore/Sumo.git
+```
+
+La clonación creará el directorio utilizado por los scripts:
+
+```text
+/home/uwicore_pc4/proyectos/TUM/Sumo
+```
+
+Los ficheros originales distribuidos con CARLA se conservan como referencia en:
+
+```text
 /home/uwicore_pc4/proyectos/CARLA_0.9.15/Co-Simulation/Sumo
 ```
-
-Si Carla está en un Docker, en otro terminal abrir un terminal bash del docker de carla:
-
-```bash
-docker exec -i -t carla_docker /bin/bash
-cd Co-Simulation/Sumo
-pwd
-/home/carla/Co-Simulation/Sumo
-```
-Si no se está ejecuatando carla en docker, los ficheros están en la ruta de instalación de CARLA
 
 
 <center>
@@ -615,13 +621,6 @@ Si no se está ejecuatando carla en docker, los ficheros están en la ruta de in
 ![Ros Autoware](./doc/images/guia-tum/carlaSumo.png "Ros Autoware")
 
 </center>
-
-Salimos del docker y copiamos los ficheros a la carpera TUM bridge que se está empleando:
-
-```bash
-exit 
-docker cp carla_docker:/home/carla/Co-Simulation/Sumo /home/uwicore_pc4/proyectos/TUM/Sumo
-```
 
 
 
